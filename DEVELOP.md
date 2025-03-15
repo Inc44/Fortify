@@ -17,7 +17,7 @@ To create a VSIX file for distribution:
 
 1. Install vsce:
 	```
-	npm install -g vsce
+	npm install -g @vscode/vsce
 	```
 2. Run:
 	```

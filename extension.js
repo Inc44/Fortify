@@ -26,12 +26,6 @@ const prettierConfig = {
 		parser: 'php',
 		tabWidth: 4,
 		useTabs: true,
-	},
-	rust:
-	{
-		parser: 'rust',
-		tabWidth: 4,
-		useTabs: true,
 	}
 };
 
@@ -78,7 +72,6 @@ async function activate(context)
 		'javascript': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'js'),
 		'json': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'json'),
 		'php': () => formatWithPrettier(vscode.window.activeTextEditor.document, prettierConfig.php),
-		'rust': () => formatWithPrettier(vscode.window.activeTextEditor.document, prettierConfig.rust),
 	};
 	for (const language in formatters)
 	{

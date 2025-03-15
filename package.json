@@ -38,8 +38,7 @@
 	{
 		"@prettier/plugin-php": "0.19.0",
 		"js-beautify": "1.15.4",
-		"prettier": "2.8.8",
-		"prettier-plugin-rust": "0.1.9"
+		"prettier": "2.8.8"
 	},
 	"contributes":
 	{

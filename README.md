@@ -6,7 +6,7 @@ Yet, another formatter.
 
 Provides formatting for:
 - HTML, CSS, JavaScript and JSON using js-beautify
-- PHP and Rust using Prettier
+- PHP using Prettier
 
 ## Usage
 

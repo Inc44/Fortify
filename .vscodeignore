@@ -1,3 +1,4 @@
 .git/**
 .gitignore
+DEVELOP.md
 node_modules/**

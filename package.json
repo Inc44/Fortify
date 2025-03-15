@@ -1,7 +1,7 @@
 {
 	"name": "fortify-formatter",
 	"displayName": "Fortify Formatter",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"publisher": "Inc44",
 	"description": "A formatter for various languages with specific configurations.",
 	"author":
@@ -14,7 +14,7 @@
 	"activationEvents": ["onLanguage:html", "onLanguage:css", "onLanguage:javascript", "onLanguage:python", "onLanguage:php", "onLanguage:rust"],
 	"engines":
 	{
-		"vscode": "^1.0.0"
+		"vscode": "^1.90.0"
 	},
 	"main": "./extension.js",
 	"scripts":
@@ -23,7 +23,7 @@
 	},
 	"devDependencies":
 	{
-		"@types/vscode": "^1.98.0",
+		"@types/vscode": "^1.90.0",
 		"@types/node": "^22.13.10",
 		"@vscode/vsce": "^3.2.2"
 	},

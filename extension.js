@@ -31,7 +31,7 @@ const prettierConfig = {
 	{
 		parser: 'rust',
 		tabWidth: 4,
-		useTabs: false,
+		useTabs: true,
 	}
 };
 

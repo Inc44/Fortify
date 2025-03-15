@@ -5,7 +5,7 @@ A formatter for various languages with specific configurations.
 ## Features
 
 Provides formatting for:
-- HTML, CSS, and JavaScript using js-beautify with custom configuration
+- HTML, CSS, JavaScript and JSON using js-beautify with custom configuration
 - Python using Black with additional processing
 - PHP using Prettier with tabulation
 - Rust using rustfmt

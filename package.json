@@ -1,7 +1,7 @@
 {
 	"name": "fortify-formatter",
 	"displayName": "Fortify Formatter",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"publisher": "Inc44",
 	"description": "A formatter for various languages with specific configurations.",
 	"author":
@@ -36,10 +36,15 @@
 	"homepage": "https://github.com/Inc44/Fortify/blob/master/README.md",
 	"dependencies":
 	{
-		"js-beautify": "^1.15.4",
-		"prettier": "^2.8.8",
 		"@prettier/plugin-php": "^0.19.0",
-		"tmp": "^0.2.3"
+		"@wasm-fmt/clang-format": "0.9.7",
+		"@wasm-fmt/gofmt": "0.4.9",
+		"@wasm-fmt/lua_fmt": "0.1.0",
+		"@wasm-fmt/ruff_fmt": "0.9.7",
+		"@wasm-fmt/sql_fmt": "0.1.0",
+		"@wasm-fmt/zig_fmt": "0.0.5",
+		"js-beautify": "^1.15.4",
+		"prettier": "^2.8.8"
 	},
 	"contributes":
 	{
@@ -54,27 +59,12 @@
 			{
 				"command": "fortifyFormatter.formatDocument",
 				"group": "1_modification",
-				"when": "editorHasDocumentFormattingProvider && editorLangId == html || editorLangId == css || editorLangId == javascript || editorLangId == json || editorLangId == python || editorLangId == php || editorLangId == rust"
+				"when": "editorHasDocumentFormattingProvider && (editorLangId == c || editorLangId == cpp || editorLangId == css || editorLangId == go || editorLangId == html || editorLangId == javascript || editorLangId == json || editorLangId == lua || editorLangId == php || editorLangId == python || editorLangId == sql || editorLangId == zig)"
 			}]
 		},
 		"configuration":
 		{
-			"title": "Fortify Formatter",
-			"properties":
-			{
-				"fortifyFormatter.blackPath":
-				{
-					"type": "string",
-					"default": "black",
-					"description": "Path to the Black formatter executable"
-				},
-				"fortifyFormatter.rustfmtPath":
-				{
-					"type": "string",
-					"default": "rustfmt",
-					"description": "Path to the Rustfmt executable"
-				}
-			}
+			"title": "Fortify Formatter"
 		}
 	}
 }

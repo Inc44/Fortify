@@ -20,49 +20,11 @@ const jsBeautifyOptions = {
 	"unescape_strings": false,
 	"wrap_line_length": "0"
 };
-const clangFormatConfig = {
-	BasedOnStyle: "Chromium",
-	IndentWidth: 4,
-	TabWidth: 4,
-	UseTab: "Always",
-};
-const ruffFormatConfig = {
-	indent_style: "tab",
-	indent_width: 4,
-};
 const phpFormatConfig = {
 	parser: 'php',
 	tabWidth: 4,
 	useTabs: true
 };
-async function formatDocument(document, formatter, config)
-{
-	const text = document.getText();
-	try
-	{
-		const
-		{
-			init,
-			format
-		} = await import(formatter);
-		await init();
-		let formattedText
-		if (typeof config === 'string' || config === undefined)
-		{
-			formattedText = format(text, config);
-		}
-		else
-		{
-			formattedText = format(text, document.fileName, JSON.stringify(config));
-		}
-		return [vscode.TextEdit.replace(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
-	}
-	catch (error)
-	{
-		vscode.window.showErrorMessage(`Error formatting: ${error.message}`);
-		return [];
-	}
-}
 
 function formatWithJsBeautify(document, language)
 {
@@ -102,18 +64,11 @@ async function formatWithPrettier(document, config)
 async function activate(context)
 {
 	const formatters = {
-		'c': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/clang-format', clangFormatConfig),
-		'cpp': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/clang-format', clangFormatConfig),
 		'css': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'css'),
-		'go': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/gofmt'),
 		'html': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'html'),
 		'javascript': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'js'),
 		'json': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'json'),
-		'lua': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/lua_fmt', "main.lua"),
 		'php': () => formatWithPrettier(vscode.window.activeTextEditor.document, phpFormatConfig),
-		'python': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/ruff_fmt', ruffFormatConfig),
-		'sql': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/sql_fmt', "query.sql"),
-		'zig': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/zig_fmt'),
 	};
 	for (const language in formatters)
 	{

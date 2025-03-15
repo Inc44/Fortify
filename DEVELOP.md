@@ -16,16 +16,16 @@
 To create a VSIX file for distribution:
 
 1. Install:
-	```
+	```powershell
 	npm install
 	```
 2. Run:
-	```
+	```powershell
 	npm run package
 	```
 3. This will create a `.vsix` file in the current directory.
 4. Move:
-	```
+	```powershell
 	mv fortify-formatter-*.*.*.vsix vsix
 	```
 

@@ -2,3 +2,4 @@
 .gitignore
 DEVELOP.md
 node_modules/**
+test/**

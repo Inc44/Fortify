@@ -1,3 +1,4 @@
+File: DEVELOP.md
 # Development Guide
 
 ## Prerequisites
@@ -5,23 +6,17 @@
 - Node.js
 - Visual Studio Code
 
-## Setup
-
-1. Clone the repository.
-2. Run `npm install` to install dependencies.
-3. Open the project in VS Code.
-
 ## Packaging the Extension
 
 To create a VSIX file for distribution:
 
-1. Install:
+1. Install dependencies:
 	```powershell
-	npm install
+	npm install  # or pnpm install
 	```
-2. Run:
+2. Build:
 	```powershell
-	npm run package
+	vsce package
 	```
 3. This will create a `.vsix` file in the current directory.
 4. Move:

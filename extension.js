@@ -20,10 +20,21 @@ const jsBeautifyOptions = {
 	"unescape_strings": false,
 	"wrap_line_length": "0"
 };
-const phpFormatConfig = {
-	parser: 'php',
-	tabWidth: 4,
-	useTabs: true
+const prettierConfig = {
+	php:
+	{
+		parser: 'php',
+		tabWidth: 4,
+		useTabs: true,
+		plugins: ['@prettier/plugin-php'],
+	},
+	rust:
+	{
+		parser: 'rust',
+		tabWidth: 4,
+		useTabs: false,
+		plugins: ['prettier-plugin-rust'],
+	}
 };
 
 function formatWithJsBeautify(document, language)
@@ -68,7 +79,8 @@ async function activate(context)
 		'html': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'html'),
 		'javascript': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'js'),
 		'json': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'json'),
-		'php': () => formatWithPrettier(vscode.window.activeTextEditor.document, phpFormatConfig),
+		'php': () => formatWithPrettier(vscode.window.activeTextEditor.document, prettierConfig.php),
+		'rust': () => formatWithPrettier(vscode.window.activeTextEditor.document, prettierConfig.rust),
 	};
 	for (const language in formatters)
 	{
@@ -92,16 +104,16 @@ async function activate(context)
 		{
 			try
 			{
-				const language = editor.document.languageId
+				const language = editor.document.languageId;
 				if (formatters[language])
 				{
-					let edits = await formatters[language]()
+					let edits = await formatters[language]();
 					const edit = new vscode.WorkspaceEdit();
 					edits.forEach(e =>
 					{
 						edit.replace(editor.document.uri, e.range, e.newText);
 					});
-					await vscode.workspace.applyEdit(edit)
+					await vscode.workspace.applyEdit(edit);
 				}
 				else
 				{

@@ -1,26 +1,26 @@
 const vscode = require('vscode');
 const beautify = require('js-beautify');
 const prettier = require('prettier');
-const jsBeautifyOptions = {
-	"brace_style": "expand",
-	"break_chained_methods": true,
-	"comma_first": false,
-	"e4x": false,
-	"end_with_newline": false,
-	"indent_char": "\t",
-	"indent_empty_lines": false,
-	"indent_inner_html": false,
-	"indent_scripts": "normal",
-	"indent_size": "1",
-	"jslint_happy": false,
-	"keep_array_indentation": false,
-	"max_preserve_newlines": "-1",
-	"preserve_newlines": false,
-	"space_before_conditional": true,
-	"unescape_strings": false,
-	"wrap_line_length": "0"
+const jsBeautifyCfg = {
+	brace_style: "expand",
+	break_chained_methods: true,
+	comma_first: false,
+	e4x: false,
+	end_with_newline: false,
+	indent_char: "\t",
+	indent_empty_lines: false,
+	indent_inner_html: false,
+	indent_scripts: "normal",
+	indent_size: "1",
+	jslint_happy: false,
+	keep_array_indentation: false,
+	max_preserve_newlines: "-1",
+	preserve_newlines: false,
+	space_before_conditional: true,
+	unescape_strings: false,
+	wrap_line_length: "0"
 };
-const prettierConfig = {
+const prettierCfg = {
 	php:
 	{
 		parser: 'php',
@@ -29,95 +29,94 @@ const prettierConfig = {
 	}
 };
 
-function formatWithJsBeautify(document, language)
+function applyFormat(doc, formatted)
 {
-	const text = document.getText();
-	let formattedText = '';
-	switch (language)
+	const allTextRange = new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText()
+		.length));
+	return [vscode.TextEdit.replace(allTextRange, formatted)];
+}
+
+function formatJSBeautify(doc, lang)
+{
+	const text = doc.getText();
+	let formatted = '';
+	switch (lang)
 	{
 		case 'html':
-			formattedText = beautify.html(text, jsBeautifyOptions);
+			formatted = beautify.html(text, jsBeautifyCfg);
 			break;
 		case 'css':
-			formattedText = beautify.css(text, jsBeautifyOptions);
+			formatted = beautify.css(text, jsBeautifyCfg);
 			break;
 		case 'js':
 		case 'json':
-			formattedText = beautify.js(text, jsBeautifyOptions);
+			formatted = beautify.js(text, jsBeautifyCfg);
 			break;
 		default:
 			return [];
 	}
-	return [vscode.TextEdit.replace(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
+	return applyFormat(doc, formatted);
 }
-async function formatWithPrettier(document, config)
+async function formatPrettier(doc, cfg)
 {
-	const text = document.getText();
-	try
-	{
-		const formattedText = await prettier.format(text, config);
-		return [vscode.TextEdit.replace(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
-	}
-	catch (error)
-	{
-		vscode.window.showErrorMessage(`Error formatting: ${error.message}`);
-		return [];
-	}
+	const text = doc.getText();
+	const formatted = await prettier.format(text, cfg);
+	return applyFormat(doc, formatted);
 }
-async function activate(context)
+async function activate(ctx)
 {
 	const formatters = {
-		'css': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'css'),
-		'html': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'html'),
-		'javascript': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'js'),
-		'json': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'json'),
-		'php': () => formatWithPrettier(vscode.window.activeTextEditor.document, prettierConfig.php),
+		'css': (doc) => formatJSBeautify(doc, 'css'),
+		'html': (doc) => formatJSBeautify(doc, 'html'),
+		'javascript': (doc) => formatJSBeautify(doc, 'js'),
+		'json': (doc) => formatJSBeautify(doc, 'json'),
+		'php': (doc) => formatPrettier(doc, prettierCfg.php),
 	};
-	for (const language in formatters)
+
+	function registerFormatter(lang, formatter)
 	{
-		const provider = vscode.languages.registerDocumentFormattingEditProvider(language,
+		const provider = vscode.languages.registerDocumentFormattingEditProvider(lang,
 		{
-			async provideDocumentFormattingEdits(document)
+			async provideDocumentFormattingEdits(doc)
 			{
-				if (formatters[language])
+				if (formatter)
 				{
-					return await formatters[language]();
+					return await formatter(doc);
 				}
 				return [];
 			}
 		});
-		context.subscriptions.push(provider);
+		ctx.subscriptions.push(provider);
 	}
-	let disposable = vscode.commands.registerCommand('fortifyFormatter.formatDocument', async () =>
+	for (const lang in formatters)
+	{
+		registerFormatter(lang, formatters[lang]);
+	}
+	const cmd = vscode.commands.registerCommand('fortifyFormatter.formatDocument', async () =>
 	{
 		const editor = vscode.window.activeTextEditor;
-		if (editor)
+		if (!editor)
 		{
-			try
+			return;
+		}
+		const doc = editor.document;
+		const lang = doc.languageId;
+		if (formatters[lang])
+		{
+			const edits = await formatters[lang](doc);
+			const edit = new vscode.WorkspaceEdit();
+			edits.forEach(e =>
 			{
-				const language = editor.document.languageId;
-				if (formatters[language])
-				{
-					let edits = await formatters[language]();
-					const edit = new vscode.WorkspaceEdit();
-					edits.forEach(e =>
-					{
-						edit.replace(editor.document.uri, e.range, e.newText);
-					});
-					await vscode.workspace.applyEdit(edit);
-				}
-				else
-				{
-					await vscode.commands.executeCommand('editor.action.formatDocument');
-				}
-			}
-			catch (error)
-			{
-				vscode.window.showErrorMessage(`Error during formatting: ${error.message}`);
-			}
+				edit.replace(doc.uri, e.range, e.newText);
+			});
+			await vscode.workspace.applyEdit(edit);
+		}
+		else
+		{
+			await vscode.commands.executeCommand('editor.action.formatDocument');
 		}
 	});
-	context.subscriptions.push(disposable);
+	ctx.subscriptions.push(cmd);
 }
 
 function deactivate()

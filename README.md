@@ -1,15 +1,13 @@
 # Fortify Formatter VSCode Extension
 
-Yet, another formatter.
+Yet another formatter.
 
 ## Features
 
-Provides formatting for:
-- HTML, CSS, JavaScript and JSON using js-beautify
-- PHP using Prettier
+- Formats HTML, CSS, JavaScript, and JSON using js-beautify.
+- Formats PHP using Prettier.
 
 ## Usage
 
-- Open a file of a supported language.
-- Use the VSCode "Format Document" command (Shift+Alt+F).
-- The document will be formatted according to the defined rules for that language.
+- Open a file.
+- Right-click "Format Document" or press `Shift+Alt+F`.

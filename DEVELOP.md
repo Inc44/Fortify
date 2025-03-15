@@ -1,34 +1,37 @@
-File: DEVELOP.md
-# Development Guide
+# Development
 
 ## Prerequisites
 
 - Node.js
 - Visual Studio Code
 
-## Packaging the Extension
+## Make the Extension Package
 
-To create a VSIX file for distribution:
+1.  Get the required files:
 
-1. Install dependencies:
 	```powershell
-	npm install  # or pnpm install
+	npm install
 	```
-2. Build:
+
+2.  Make the package:
+
 	```powershell
 	vsce package
 	```
-3. This will create a `.vsix` file in the current directory.
-4. Move:
+
+3.  A `.vsix` file is created in the current directory.
+
+4.  Move (optional):
+
 	```powershell
 	mv fortify-formatter-*.*.*.vsix vsix
 	```
 
-## Installation
+## Install
 
-- Download the VSIX file.
+- Get the VSIX file.
 - Open VSCode.
 - Go to Extensions.
-- Click on the "..." menu in the upper right corner.
-- Select "Install from VSIX..."
-- Choose the downloaded VSIX file.
+- Click the "..." menu in the upper right corner.
+- Select "Install from VSIX...".
+- Select the VSIX file.

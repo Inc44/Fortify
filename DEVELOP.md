@@ -15,15 +15,19 @@
 
 To create a VSIX file for distribution:
 
-1. Install vsce:
+1. Install:
 	```
-	npm install -g @vscode/vsce
+	npm install
 	```
 2. Run:
 	```
 	npm run package
 	```
 3. This will create a `.vsix` file in the current directory.
+4. Move:
+	```
+	mv fortify-formatter-*.*.*.vsix vsix
+	```
 
 ## Installation
 

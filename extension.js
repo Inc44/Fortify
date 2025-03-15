@@ -71,7 +71,22 @@ function activate(context)
 			return formatRust(document);
 		}
 	});
-	context.subscriptions.push(htmlFormatter, cssFormatter, jsFormatter, pythonFormatter, phpFormatter, rustFormatter);
+	let disposable = vscode.commands.registerCommand('fortifyFormatter.formatDocument', async () =>
+	{
+		const editor = vscode.window.activeTextEditor;
+		if (editor)
+		{
+			try
+			{
+				await vscode.commands.executeCommand('editor.action.formatDocument');
+			}
+			catch (error)
+			{
+				vscode.window.showErrorMessage(`Error during formatting: ${error.message}`);
+			}
+		}
+	});
+	context.subscriptions.push(htmlFormatter, cssFormatter, jsFormatter, pythonFormatter, phpFormatter, rustFormatter, disposable);
 }
 
 function getExtensionSetting(name, defaultValue)

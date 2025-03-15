@@ -11,10 +11,10 @@
 	"categories": ["Formatters"],
 	"icon": "fortify.png",
 	"pricing": "Free",
-	"activationEvents": ["onLanguage:html", "onLanguage:css", "onLanguage:javascript", "onLanguage:python", "onLanguage:php", "onLanguage:rust"],
+	"activationEvents": ["onStartupFinished"],
 	"engines":
 	{
-		"vscode": "^1.90.0"
+		"vscode": "^1.60.0"
 	},
 	"main": "./extension.js",
 	"scripts":
@@ -23,7 +23,7 @@
 	},
 	"devDependencies":
 	{
-		"@types/vscode": "^1.90.0",
+		"@types/vscode": "^1.60.0",
 		"@types/node": "^22.13.10",
 		"@vscode/vsce": "^3.2.2"
 	},
@@ -45,9 +45,18 @@
 	{
 		"commands": [
 		{
-			"command": "fortify-formatter.format",
+			"command": "fortifyFormatter.formatDocument",
 			"title": "Format with Fortify Formatter"
 		}],
+		"menus":
+		{
+			"editor/context": [
+			{
+				"command": "fortifyFormatter.formatDocument",
+				"group": "1_modification",
+				"when": "editorHasDocumentFormattingProvider && editorLangId == javascript || editorLangId == css || editorLangId == html || editorLangId == python || editorLangId == php || editorLangId == rust"
+			}]
+		},
 		"configuration":
 		{
 			"title": "Fortify Formatter",

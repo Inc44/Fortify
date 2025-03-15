@@ -54,7 +54,7 @@
 			{
 				"command": "fortifyFormatter.formatDocument",
 				"group": "1_modification",
-				"when": "editorHasDocumentFormattingProvider && editorLangId == javascript || editorLangId == css || editorLangId == html || editorLangId == python || editorLangId == php || editorLangId == rust"
+				"when": "editorHasDocumentFormattingProvider && editorLangId == html || editorLangId == css || editorLangId == javascript || editorLangId == json || editorLangId == python || editorLangId == php || editorLangId == rust"
 			}]
 		},
 		"configuration":

@@ -50,6 +50,13 @@ function activate(context)
 			return formatWithJsBeautify(document, 'js');
 		}
 	});
+	const jsonFormatter = vscode.languages.registerDocumentFormattingEditProvider('json',
+	{
+		provideDocumentFormattingEdits(document)
+		{
+			return formatWithJsBeautify(document, 'json');
+		}
+	});
 	const pythonFormatter = vscode.languages.registerDocumentFormattingEditProvider('python',
 	{
 		provideDocumentFormattingEdits(document)
@@ -86,7 +93,7 @@ function activate(context)
 			}
 		}
 	});
-	context.subscriptions.push(htmlFormatter, cssFormatter, jsFormatter, pythonFormatter, phpFormatter, rustFormatter, disposable);
+	context.subscriptions.push(htmlFormatter, cssFormatter, jsFormatter, jsonFormatter, pythonFormatter, phpFormatter, rustFormatter, disposable);
 }
 
 function getExtensionSetting(name, defaultValue)
@@ -108,6 +115,9 @@ function formatWithJsBeautify(document, type)
 			formattedText = beautify.css(text, jsbeautifyConfig);
 			break;
 		case 'js':
+			formattedText = beautify.js(text, jsbeautifyConfig);
+			break;
+		case 'json':
 			formattedText = beautify.js(text, jsbeautifyConfig);
 			break;
 		default:

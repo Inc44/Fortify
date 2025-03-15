@@ -26,14 +26,12 @@ const prettierConfig = {
 		parser: 'php',
 		tabWidth: 4,
 		useTabs: true,
-		plugins: ['@prettier/plugin-php'],
 	},
 	rust:
 	{
 		parser: 'rust',
 		tabWidth: 4,
 		useTabs: false,
-		plugins: ['prettier-plugin-rust'],
 	}
 };
 

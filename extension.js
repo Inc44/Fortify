@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const beautify = require('js-beautify');
 const prettier = require('prettier');
-const jsbeautifyConfig = {
+const jsBeautifyOptions = {
 	"brace_style": "expand",
 	"break_chained_methods": true,
 	"comma_first": false,
@@ -20,85 +20,116 @@ const jsbeautifyConfig = {
 	"unescape_strings": false,
 	"wrap_line_length": "0"
 };
+const clangFormatConfig = {
+	BasedOnStyle: "Chromium",
+	IndentWidth: 4,
+	TabWidth: 4,
+	UseTab: "Always",
+};
+const ruffFormatConfig = {
+	indent_style: "tab",
+	indent_width: 4,
+};
+const phpFormatConfig = {
+	parser: 'php',
+	tabWidth: 4,
+	useTabs: true
+};
+async function formatDocument(document, formatter, config)
+{
+	const text = document.getText();
+	try
+	{
+		const
+		{
+			init,
+			format
+		} = await import(formatter);
+		await init();
+		let formattedText
+		if (typeof config === 'string' || config === undefined)
+		{
+			formattedText = format(text, config);
+		}
+		else
+		{
+			formattedText = format(text, document.fileName, JSON.stringify(config));
+		}
+		return [vscode.TextEdit.replace(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
+	}
+	catch (error)
+	{
+		vscode.window.showErrorMessage(`Error formatting: ${error.message}`);
+		return [];
+	}
+}
+
+function formatWithJsBeautify(document, language)
+{
+	const text = document.getText();
+	let formattedText = '';
+	switch (language)
+	{
+		case 'html':
+			formattedText = beautify.html(text, jsBeautifyOptions);
+			break;
+		case 'css':
+			formattedText = beautify.css(text, jsBeautifyOptions);
+			break;
+		case 'js':
+		case 'json':
+			formattedText = beautify.js(text, jsBeautifyOptions);
+			break;
+		default:
+			return [];
+	}
+	return [vscode.TextEdit.replace(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
+}
+async function formatWithPrettier(document, config)
+{
+	const text = document.getText();
+	try
+	{
+		const formattedText = await prettier.format(text, config);
+		return [vscode.TextEdit.replace(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
+	}
+	catch (error)
+	{
+		vscode.window.showErrorMessage(`Error formatting: ${error.message}`);
+		return [];
+	}
+}
 async function activate(context)
 {
-	const cppFormatter = vscode.languages.registerDocumentFormattingEditProvider(['cpp', 'c'],
+	const formatters = {
+		'c': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/clang-format', clangFormatConfig),
+		'cpp': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/clang-format', clangFormatConfig),
+		'css': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'css'),
+		'go': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/gofmt'),
+		'html': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'html'),
+		'javascript': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'js'),
+		'json': () => formatWithJsBeautify(vscode.window.activeTextEditor.document, 'json'),
+		'lua': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/lua_fmt', "main.lua"),
+		'php': () => formatWithPrettier(vscode.window.activeTextEditor.document, phpFormatConfig),
+		'python': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/ruff_fmt', ruffFormatConfig),
+		'sql': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/sql_fmt', "query.sql"),
+		'zig': () => formatDocument(vscode.window.activeTextEditor.document, '@wasm-fmt/zig_fmt'),
+	};
+	for (const language in formatters)
 	{
-		async provideDocumentFormattingEdits(document)
+		const provider = vscode.languages.registerDocumentFormattingEditProvider(language,
 		{
-			return await formatCPP(document);
-		}
-	});
-	const cssFormatter = vscode.languages.registerDocumentFormattingEditProvider('css',
-	{
-		provideDocumentFormattingEdits(document)
-		{
-			return formatWithJsBeautify(document, 'css');
-		}
-	});
-	const goFormatter = vscode.languages.registerDocumentFormattingEditProvider('go',
-	{
-		async provideDocumentFormattingEdits(document)
-		{
-			return await formatGo(document);
-		}
-	});
-	const htmlFormatter = vscode.languages.registerDocumentFormattingEditProvider('html',
-	{
-		provideDocumentFormattingEdits(document)
-		{
-			return formatWithJsBeautify(document, 'html');
-		}
-	});
-	const jsFormatter = vscode.languages.registerDocumentFormattingEditProvider('javascript',
-	{
-		provideDocumentFormattingEdits(document)
-		{
-			return formatWithJsBeautify(document, 'js');
-		}
-	});
-	const jsonFormatter = vscode.languages.registerDocumentFormattingEditProvider('json',
-	{
-		provideDocumentFormattingEdits(document)
-		{
-			return formatWithJsBeautify(document, 'json');
-		}
-	});
-	const luaFormatter = vscode.languages.registerDocumentFormattingEditProvider('lua',
-	{
-		async provideDocumentFormattingEdits(document)
-		{
-			return await formatLua(document);
-		}
-	});
-	const phpFormatter = vscode.languages.registerDocumentFormattingEditProvider('php',
-	{
-		provideDocumentFormattingEdits(document)
-		{
-			return formatPHP(document);
-		}
-	});
-	const pythonFormatter = vscode.languages.registerDocumentFormattingEditProvider('python',
-	{
-		async provideDocumentFormattingEdits(document)
-		{
-			return await formatPython(document);
-		}
-	});
-	const sqlFormatter = vscode.languages.registerDocumentFormattingEditProvider('sql',
-	{
-		async provideDocumentFormattingEdits(document)
-		{
-			return await formatSql(document);
-		}
-	});
-	const zigFormatter = vscode.languages.registerDocumentFormattingEditProvider('zig',
-	{
-		async provideDocumentFormattingEdits(document)
-		{
-			return await formatZig(document);
-		}
-	});
+			async provideDocumentFormattingEdits(document)
+			{
+				if (formatters[language])
+				{
+					return await formatters[language]();
+				}
+				return [];
+			}
+		});
+		context.subscriptions.push(provider);
+	}
 	let disposable = vscode.commands.registerCommand('fortifyFormatter.formatDocument', async () =>
 	{
 		const editor = vscode.window.activeTextEditor;
@@ -106,7 +137,21 @@ async function activate(context)
 		{
 			try
 			{
-				await vscode.commands.executeCommand('editor.action.formatDocument');
+				const language = editor.document.languageId
+				if (formatters[language])
+				{
+					let edits = await formatters[language]()
+					const edit = new vscode.WorkspaceEdit();
+					edits.forEach(e =>
+					{
+						edit.replace(editor.document.uri, e.range, e.newText);
+					});
+					await vscode.workspace.applyEdit(edit)
+				}
+				else
+				{
+					await vscode.commands.executeCommand('editor.action.formatDocument');
+				}
 			}
 			catch (error)
 			{
@@ -114,175 +159,7 @@ async function activate(context)
 			}
 		}
 	});
-	context.subscriptions.push(htmlFormatter, cssFormatter, jsFormatter, jsonFormatter, pythonFormatter, phpFormatter, goFormatter, cppFormatter, zigFormatter, luaFormatter, sqlFormatter, disposable);
-}
-async function formatCPP(document)
-{
-	const text = document.getText();
-	try
-	{
-		const init = (await import("@wasm-fmt/clang-format"))
-			.init;
-		const format = (await import("@wasm-fmt/clang-format"))
-			.format;
-		await init();
-		const config = JSON.stringify(
-		{
-			BasedOnStyle: "Chromium",
-			IndentWidth: 4,
-			TabWidth: 4,
-			UseTab: Always,
-		});
-		const formattedText = format(text, document.fileName, config);
-		return [new vscode.TextEdit(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
-	}
-	catch (error)
-	{
-		vscode.window.showErrorMessage(`Error formatting C/C++: ${error.message}`);
-		return [];
-	}
-}
-async function formatGo(document)
-{
-	const text = document.getText();
-	try
-	{
-		const init = (await import("@wasm-fmt/gofmt"))
-			.init;
-		const format = (await import("@wasm-fmt/gofmt"))
-			.format;
-		await init();
-		const formattedText = format(text);
-		return [new vscode.TextEdit(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
-	}
-	catch (error)
-	{
-		vscode.window.showErrorMessage(`Error formatting Go: ${error.message}`);
-		return [];
-	}
-}
-
-function formatWithJsBeautify(document, type)
-{
-	const text = document.getText();
-	let formattedText = '';
-	switch (type)
-	{
-		case 'html':
-			formattedText = beautify.html(text, jsbeautifyConfig);
-			break;
-		case 'css':
-			formattedText = beautify.css(text, jsbeautifyConfig);
-			break;
-		case 'js':
-			formattedText = beautify.js(text, jsbeautifyConfig);
-			break;
-		case 'json':
-			formattedText = beautify.js(text, jsbeautifyConfig);
-			break;
-		default:
-			formattedText = text;
-	}
-	return [new vscode.TextEdit(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
-}
-async function formatLua(document)
-{
-	const text = document.getText();
-	try
-	{
-		const init = (await import("@wasm-fmt/lua_fmt"))
-			.init;
-		const format = (await import("@wasm-fmt/lua_fmt"))
-			.format;
-		await init();
-		const formattedText = format(text, "main.lua");
-		return [new vscode.TextEdit(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
-	}
-	catch (error)
-	{
-		vscode.window.showErrorMessage(`Error formatting Lua: ${error.message}`);
-		return [];
-	}
-}
-async function formatPHP(document)
-{
-	const text = document.getText();
-	try
-	{
-		const formattedText = await prettier.format(text,
-		{
-			parser: 'php',
-			tabWidth: 4,
-			useTabs: true
-		});
-		return [new vscode.TextEdit(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
-	}
-	catch (error)
-	{
-		vscode.window.showErrorMessage(`Error formatting PHP: ${error.message}`);
-		return [];
-	}
-}
-async function formatPython(document)
-{
-	const text = document.getText();
-	try
-	{
-		const init = (await import("@wasm-fmt/ruff_fmt"))
-			.init;
-		const format = (await import("@wasm-fmt/ruff_fmt"))
-			.format;
-		await init();
-		const formattedText = format(text,
-		{
-			indent_style: "tab",
-			indent_width: 4,
-		});
-		return [new vscode.TextEdit(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
-	}
-	catch (error)
-	{
-		vscode.window.showErrorMessage(`Error formatting Python: ${error.message}`);
-		return [];
-	}
-}
-async function formatSql(document)
-{
-	const text = document.getText();
-	try
-	{
-		const init = (await import("@wasm-fmt/sql_fmt"))
-			.init;
-		const format = (await import("@wasm-fmt/sql_fmt"))
-			.format;
-		await init();
-		const formattedText = format(text, "query.sql");
-		return [new vscode.TextEdit(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
-	}
-	catch (error)
-	{
-		vscode.window.showErrorMessage(`Error formatting SQL: ${error.message}`);
-		return [];
-	}
-}
-async function formatZig(document)
-{
-	const text = document.getText();
-	try
-	{
-		const init = (await import("@wasm-fmt/zig_fmt"))
-			.init;
-		const format = (await import("@wasm-fmt/zig_fmt"))
-			.format;
-		await init();
-		const formattedText = format(text);
-		return [new vscode.TextEdit(new vscode.Range(document.positionAt(0), document.positionAt(text.length)), formattedText)];
-	}
-	catch (error)
-	{
-		vscode.window.showErrorMessage(`Error formatting Zig: ${error.message}`);
-		return [];
-	}
+	context.subscriptions.push(disposable);
 }
 
 function deactivate()

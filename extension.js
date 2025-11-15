@@ -41,6 +41,11 @@ const asmDataOps = {
 	resq: true,
 	rest: true
 };
+const asmEmptySection = {
+	maxLabel: 0,
+	maxMnemonic: 0,
+	maxOperands: 0
+};
 
 function applyFormat(doc, formatted)
 {
@@ -237,12 +242,7 @@ function formatParsedLine(parsedLine, sections)
 	if (!parsedLine.inSection || !parsedLine.section) return buildSimpleLine(parsedLine.label, parsedLine.mnemonic, parsedLine.operands, parsedLine.comment);
 	if (parsedLine.isLabelOnly) return parsedLine.label + (parsedLine.comment ? '\t' + parsedLine.comment : '');
 	if (parsedLine.isGlobalLike) return buildSimpleLine('', parsedLine.mnemonic, parsedLine.operands, parsedLine.comment);
-	const section = sections[parsedLine.section] ||
-	{
-		maxLabel: 0,
-		maxMnemonic: 0,
-		maxOperands: 0
-	};
+	const section = sections[parsedLine.section] || asmEmptySection;
 	return buildAlignedLine(parsedLine, section);
 }
 
@@ -262,20 +262,12 @@ function formatAsm(doc)
 			section = parsedLine.section || null;
 			if (section && !sections[section])
 			{
-				sections[section] = {
-					maxLabel: 0,
-					maxMnemonic: 0,
-					maxOperands: 0
-				};
+				sections[section] = asmEmptySection;
 			}
 		}
 		else if (parsedLine.type === 'code' && parsedLine.inSection && parsedLine.section && !parsedLine.isLabelOnly && !parsedLine.isGlobalLike)
 		{
-			const section = sections[parsedLine.section] || (sections[parsedLine.section] = {
-				maxLabel: 0,
-				maxMnemonic: 0,
-				maxOperands: 0
-			});
+			const section = sections[parsedLine.section] || (sections[parsedLine.section] = asmEmptySection);
 			if (parsedLine.label && parsedLine.label.length > section.maxLabel) section.maxLabel = parsedLine.label.length;
 			if (parsedLine.mnemonic && parsedLine.mnemonic.length > section.maxMnemonic) section.maxMnemonic = parsedLine.mnemonic.length;
 			if (parsedLine.operands && parsedLine.operands.length > section.maxOperands) section.maxOperands = parsedLine.operands.length;

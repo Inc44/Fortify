@@ -19,6 +19,39 @@ Yet another formatter.
 - Formats PHP using Prettier.
 - Formats Intel x86 Assembly using a custom formatter.
 
+## 🚀 Installation
+
+- Get the `.vsix` file.
+- Open Visual Studio Code.
+- Go to Extensions.
+- Click the "..." menu in the upper right corner.
+- Select "Install from VSIX...".
+- Select the `.vsix` file.
+
+## 📦 Publish
+
+1. Install Node.js with npm and Visual Studio Code.
+
+2. Get the required files:
+
+```bash
+npm install
+```
+
+3. Make the package:
+
+```bash
+vsce package
+```
+
+4. A `.vsix` file is created in the current directory.
+
+5. Move (optional):
+
+```bash
+mv fortify-formatter-*.*.*.vsix vsix
+```
+
 ## 📖 Usage
 
 - Open a file.

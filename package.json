@@ -1,7 +1,7 @@
 {
 	"name": "fortify-formatter",
 	"displayName": "Fortify Formatter",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"publisher": "Inc44",
 	"description": "Yet another formatter.",
 	"author":
@@ -53,7 +53,7 @@
 			{
 				"command": "fortifyFormatter.formatDocument",
 				"group": "1_modification",
-				"when": "editorHasDocumentFormattingProvider && (editorLangId == css || editorLangId == html || editorLangId == javascript || editorLangId == json || editorLangId == php || editorLangId == rust)"
+				"when": "editorLangId == asm-intel-x86-generic || editorHasDocumentFormattingProvider && (editorLangId == css || editorLangId == html || editorLangId == javascript || editorLangId == json || editorLangId == php || editorLangId == rust)"
 			}]
 		},
 		"configuration":

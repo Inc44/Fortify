@@ -1,4 +1,8 @@
 const vscode = require('vscode');
+const
+{
+	execSync
+} = require('child_process');
 const beautify = require('js-beautify');
 const prettier = require('prettier');
 const jsBeautifyCfg = {
@@ -80,6 +84,28 @@ async function formatPrettier(doc, cfg)
 	const text = doc.getText();
 	const formatted = await prettier.format(text, cfg);
 	return applyFormat(doc, formatted);
+}
+async function formatKotlin(doc)
+{
+	const config = vscode.workspace.getConfiguration('fortifyFormatter');
+	const ktfmtPath = config.get('ktfmtPath');
+	const text = doc.getText();
+	try
+	{
+		let formatted = execSync(`java -jar "${ktfmtPath}" --kotlinlang-style -`,
+		{
+			input: text,
+			encoding: 'utf8'
+		});
+		formatted = formatted.replace(/ {4}/g, '\t')
+			.replace(/\r?\n$/, '');
+		return applyFormat(doc, formatted);
+	}
+	catch (error)
+	{
+		vscode.window.showErrorMessage(`Error formatting Kotlin: ${error.message}`);
+		return [];
+	}
 }
 
 function extractComment(line)
@@ -285,6 +311,7 @@ async function activate(ctx)
 		'javascript': (doc) => formatJSBeautify(doc, 'js'),
 		'json': (doc) => formatJSBeautify(doc, 'json'),
 		'php': (doc) => formatPrettier(doc, prettierCfg.php),
+		'kotlin': (doc) => formatKotlin(doc),
 	};
 
 	function registerFormatter(lang, formatter)
@@ -309,10 +336,7 @@ async function activate(ctx)
 	const cmd = vscode.commands.registerCommand('fortifyFormatter.formatDocument', async () =>
 	{
 		const editor = vscode.window.activeTextEditor;
-		if (!editor)
-		{
-			return;
-		}
+		if (!editor) return;
 		const doc = editor.document;
 		const lang = doc.languageId;
 		if (formatters[lang])

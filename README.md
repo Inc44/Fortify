@@ -17,6 +17,7 @@ Yet another formatter.
 
 - Formats HTML, CSS, JavaScript, and JSON using js-beautify.
 - Formats PHP using Prettier.
+- Formats Kotlin using ktfmt.
 - Formats Intel x86 Assembly using a custom formatter.
 
 ## 🚀 Installation
@@ -44,6 +45,18 @@ npm install
 vsce package
 ```
 
+Or
+
+```bash
+npx vsce package
+```
+
+Or
+
+```bash
+npm run package
+```
+
 4. A `.vsix` file is created in the current directory.
 
 5. Move (optional):
@@ -63,6 +76,7 @@ Creators of:
 
 - [js-beautify](https://beautifier.io)
 - [Prettier](https://prettier.io)
+- [ktfmt](https://facebook.github.io/ktfmt)
 
 ## 🤝 Contribution
 

@@ -65,6 +65,18 @@ npm run package
 mv fortify-formatter-*.*.*.vsix vsix
 ```
 
+6. Publish:
+
+```bash
+vsce publish
+```
+
+Or
+
+```bash
+npx vsce publish
+```
+
 ## 📖 Usage
 
 - Open a file.
